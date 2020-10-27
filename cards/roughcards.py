@@ -4,7 +4,6 @@ class Card:
     # Initializes our card class with a rank and color
     # rank: an integer between 1-4
     # color - a string (“R”, “B”, “G”, or “Y”) 
-    # self is of type Card
     def __init__(self, rank, color):
         self.rank = rank
         self.color = color
@@ -13,17 +12,14 @@ class Card:
     def get_rank(self):
         return self.rank
 
-    # returns the color of the card
     def get_color(self):
         return self.color
 
-    #displays the |card|
     def display(self):
         print("|" + str(self.rank) + self.color + "|")
 
 class Deck:
     # Initialize our deck class, by generating all the different possible cards we could have in our 16 card deck
-    # Self is type Deck here
     def __init__(self):
         self.card_list = []
         self.color_list = ["R", "B", "G", "Y"]
@@ -65,15 +61,38 @@ class Player:
     # Returns the sum of all the cards of a particular color in the player’s hand.
     def colored_cards(self, color):
         # lists storing all the values of cards per colour
-        color_sum = []
-       
-        for card in self.player_hand:
-            if card.get_color() == color: 
-                color_sum.append(card.get_rank())
+        red_cards = []
+        blue_cards = []
+        green_cards = []
+        yellow_cards = []
 
-            sum_of_cards = sum(color_sum)
+        # obtain the rank of each element in self.player_hand using the get_rank method, based on the return value of the get_color method
+        for index in range(len(self.player_hand)):
+            if self.player_hand[index].get_color() == 'R':
+                red_cards.append(self.player_hand[index].get_rank())
+
+            elif self.player_hand[index].get_color() == 'B':
+                blue_cards.append(self.player_hand[index].get_rank())
+
+            elif self.player_hand[index].get_color() == 'G':
+                green_cards.append(self.player_hand[index].get_rank())
+
+            else:
+                yellow_cards.append(self.player_hand[index].get_rank())
+            
+        # condtional statements that return the sum of the desired color of cards within the player hand 
+        if color == 'R':
+            sum_of_cards = sum(red_cards)
+        elif color == 'B':
+            sum_of_cards = sum(blue_cards)
+        elif color == 'G':
+            sum_of_cards = sum(green_cards)
+        elif color == 'Y':
+            sum_of_cards = sum(yellow_cards)
+        else:
+            sum_of_cards = 0
         
-        print("The sum of", color, "cards in the player's hand is:", sum_of_cards)
+        print("The sum of", color, "cards in the player's hand is:", str(sum_of_cards))
         
     # display the player's hand
     def display(self):

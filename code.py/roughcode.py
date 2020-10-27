@@ -28,7 +28,12 @@ def rev_string(word):
     word = reversed_word
     return word
 
-def add_to_decoded_list(decoded_list, word_list):
+# Returns a string that has all the characters that are in word, in the same order except that 2 is subtracted from every alternate digit, starting with the first digit, that may occur inside the word. 
+def sub_alt_num(word):
+    #word_list = list(word)
+    word_list = list(word)
+    decoded_list = []
+    alternate = 2
     # Make a new list with the elements in word_list as integers and strings based on their order number
     for index in range(len(word_list)):
         if ord(word_list[index]) >= 48 and ord(word_list[index]) <= 57:
@@ -36,9 +41,7 @@ def add_to_decoded_list(decoded_list, word_list):
             decoded_list.append(obtain_int)
         else:
             decoded_list.append(word_list[index])
-
-# decrypts the integers by subtracting 2 from every other integer
-def decrypt_integers(decoded_list, alternate, word_list):
+    
     # for every integer in decoded_list, we will subtract 2 from. 
     # Use the remainder method to do so
     # update word_list with new integers
@@ -48,15 +51,6 @@ def decrypt_integers(decoded_list, alternate, word_list):
                 decoded_list[index] = decoded_list[index] - 2
             alternate = alternate + 1
         word_list[index] = decoded_list[index]
-
-# Returns a string that has all the characters that are in word, in the same order except that 2 is subtracted from every alternate digit, starting with the first digit, that may occur inside the word. 
-def sub_alt_num(word):
-    #word_list = list(word)
-    word_list = list(word)
-    decoded_list = []
-    alternate = 2
-    add_to_decoded_list(decoded_list, word_list)
-    decrypt_integers(decoded_list, alternate, word_list)
     
     #re-string integers in word_list so we can use the .join method
     for index in range(len(word_list)):
