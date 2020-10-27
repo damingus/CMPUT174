@@ -47,10 +47,12 @@ class Game:
       
 
       # === game specific objects
-      self.ball = Ball('white', 5, [250, 200], [7, 7], self.surface)
-      self.paddle1 = Paddle('white', 10, 40, [50 ,200], [0, 5], self.surface)
-      self.paddle2 = Paddle('white', 10, 40, [450 ,200], [0, 5], self.surface)
+      self.ball = Ball('white', 5, [250, 200], [4,4], self.surface)
+      self.paddle1 = Paddle('white', 10, 45, [50 ,200], [0, 5], self.surface)
+      self.paddle2 = Paddle('white', 10, 45, [450 ,200], [0, 5], self.surface)
 
+      self.left_score = 0
+      self.right_score = 0
       # self.max_frames = 150
       # self.frame_counter = 0
 
@@ -64,7 +66,7 @@ class Game:
          self.draw()            
          if self.continue_game:
             self.update()
-            self.decide_continue()
+            
          self.game_Clock.tick(self.FPS) # run at most with FPS Frames Per Second 
 
    def handle_events(self):
@@ -75,6 +77,16 @@ class Game:
       for event in events:
          if event.type == pygame.QUIT:
             self.close_clicked = True
+      pressed_key = pygame.key.get_pressed()
+      if pressed_key[pygame.K_q]:
+         self.paddle1.move('up')
+      if pressed_key[pygame.K_a]:
+         self.paddle1.move('down')
+      if pressed_key[pygame.K_p]:
+         self.paddle2.move('up')
+      if pressed_key[pygame.K_l]:
+         self.paddle2.move('down')
+
 
    def draw(self):
       # Draw all game objects.
@@ -90,29 +102,42 @@ class Game:
       # Update the game objects for the next frame.
       # - self is the Game to update
       
+      # move the ball
       self.ball.move()
-      self.paddle1.move()
-      self.paddle2.move()
-      # self.frame_counter = self.frame_counter + 1
+      # update the paddle rectangles
+      self.paddle1.update()
+      self.paddle2.update()
+      # check if paddle collides with ball
+      self.collide_paddle()
 
-   def decide_continue(self):
-      # Check and remember if the game should continue
-      # - self is the Game to check
-      pass
-      #if self.frame_counter > self.max_frames:
-         #self.continue_game = False
+
+   def collide_paddle(self):
+      # if the ball center is a point in paddle1.rect, then a boolean of true will occur
+      # if true, then we will reverse the 'x' velocity of the ball
+      # - self is the Game
+       if self.paddle1.rect.collidepoint(self.ball.center) == True:
+          # if the ball is moving left and collides with the paddle, reverse it to move right
+          if self.ball.velocity[0] < 0: 
+            # avoid bouncing from behind paddle since ball velocity is positive
+            self.ball.velocity[0] = -self.ball.velocity[0]
+       if self.paddle2.rect.collidepoint(self.ball.center) == True:
+         # if the ball is moving right and collides with the paddle, reverse it to move left
+         if self.ball.velocity[0] > 0:
+            # avoid bouncing from behind paddle since ball velocity is negative
+            self.ball.velocity[0] = -self.ball.velocity[0]
+            
 
 
 class Ball:
    # An object in this class represents a Dot that moves 
    
    def __init__(self, ball_color, ball_radius, ball_center, ball_velocity, surface):
-      # Initialize a Dot.
-      # - self is the Dot to initialize
-      # - color is the pygame.Color of the dot
+      # Initialize a Ball.
+      # - self is the Ball to initialize
+      # - color is the pygame.Color of the Ball
       # - center is a list containing the x and y int
-      #   coords of the center of the dot
-      # - radius is the int pixel radius of the dot
+      #   coords of the center of the Ball
+      # - radius is the int pixel radius of the Ball
       # - velocity is a list containing the x and y components
       # - surface is the window's pygame.Surface object
 
@@ -122,45 +147,57 @@ class Ball:
       self.velocity = ball_velocity
       self.surface = surface
       
+      
    def move(self):
-      # Change the location of the Dot by adding the corresponding 
+      # Change the location of the Ball by adding the corresponding 
       # speed values to the x and y coordinate of its center
-      # - self is the Dot
+      # - self is the Ball
       size = self.surface.get_size() # get size is a method inside pygame.Surface class, returns (width, height)
       for i in range(0,2):
          self.center[i] = (self.center[i] + self.velocity[i])  # center is bound to object type list
          # left, right, bottom, top
-         if self.center[i] < self.radius or self.center[i] + self.radius > size[i]: # right edge of window
+         if self.center[i] < self.radius or self.center[i] + self.radius >= size[i]: # right edge of window
              self.velocity[i] = -self.velocity[i]
+      
+         
          
    def draw(self):
-      # Draw the dot on the surface
-      # - self is the Dot
-      
+      # Draw the Ball on the surface
+      # - self is the Ball
       pygame.draw.circle(self.surface, self.color, self.center, self.radius)
 
 class Paddle:
     def __init__(self, paddle_color, paddle_width, paddle_height, paddle_center, paddle_velocity, surface):
         self.paddle_color = pygame.Color(paddle_color)
+        self.paddle_height = paddle_height
         self.paddle_width = paddle_width
+        self.paddle_dimensions = (paddle_width, paddle_height)
         self.paddle_center = paddle_center
         self.paddle_velocity = paddle_velocity
         self.surface = surface
-        self.dimensions = (paddle_width, paddle_height)
-        self.rect = (self.paddle_center, self.dimensions)
+        
     
-
-
-    def move(self):
+    def update(self):
+        # update the rect of the paddle as the paddles move
+        self.rect = pygame.Rect(self.paddle_center, self.paddle_dimensions)
+    
+    def move(self, direction):
         # change the location of the paddles by adding corresponding speed values to y coordinate of 
         # its center
         # self is the Paddle
-        size = self.surface.get_size()
-        self.paddle_center[1] += self.paddle_velocity[1]
-
+        # direction is type str
+        size = (500, 400) # window size
+        if direction == 'up':
+           # stop the paddle from going over the top edge
+           if self.paddle_center[1] >= 0:
+              self.paddle_center[1] -= self.paddle_velocity[1] 
+        elif direction == 'down':
+           # stop the paddle from going over the bottom edge
+           if self.paddle_center[1] + self.paddle_height <= size[1]:
+            self.paddle_center[1] += self.paddle_velocity[1]
 
     def draw(self):
         # Draw the paddle on the surface
         # self is the Paddle
-        pygame.draw.rect(self.surface, self.paddle_color, self.rect)
+        pygame.draw.rect(self.surface, self.paddle_color, (self.paddle_center, self.paddle_dimensions))
 main()
