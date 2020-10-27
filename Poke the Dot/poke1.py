@@ -96,7 +96,7 @@ class Game:
       pygame.display.update() # make the updated surface appear on the display
 
    def draw_score(self):
-      font_size = 72
+      font_size = 75
       fg_color = pygame.Color("white")
       string = 'Score: ' + str(self.score)
       # step 1 create a font object

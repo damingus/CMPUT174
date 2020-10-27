@@ -48,13 +48,12 @@ class Game:
 
       # === game specific objects
       self.ball = Ball('white', 5, [250, 200], [4,4], self.surface)
-      self.paddle1 = Paddle('white', 10, 45, [50 ,200], [0, 5], self.surface)
-      self.paddle2 = Paddle('white', 10, 45, [450 ,200], [0, 5], self.surface)
+      self.paddle1 = Paddle('white', 11, 42, [90 ,200], [0, 5], self.surface)
+      self.paddle2 = Paddle('white', 11, 42, [410 ,200], [0, 5], self.surface)
 
       self.left_score = 0
       self.right_score = 0
-      # self.max_frames = 150
-      # self.frame_counter = 0
+
 
    def play(self):
       # Play the game until the player presses the close box.
@@ -96,14 +95,43 @@ class Game:
       self.ball.draw()
       self.paddle1.draw()
       self.paddle2.draw()
+      self.draw_left_score()
+      self.draw_right_score()
       pygame.display.update() # make the updated surface appear on the display
+
+   def draw_left_score(self):
+       # draw the left score
+       # self is the Game 
+      font_size = 50
+      fg_color = pygame.Color('white')
+      string = str(self.left_score)
+      font = pygame.font.SysFont("Arial", font_size)
+      text_box = font.render(string, True, fg_color)
+      location = (0, 0)
+      self.surface.blit(text_box, location)
+
+   def draw_right_score(self):
+       # draw the right score
+       # self is the Game
+      font_size = 50
+      fg_color = pygame.Color('white')
+      string = str(self.right_score)
+      font = pygame.font.SysFont("Arial", font_size)
+      text_box = font.render(string, True, fg_color)
+      location = (450, 0)
+      self.surface.blit(text_box, location)
 
    def update(self):
       # Update the game objects for the next frame.
       # - self is the Game to update
       
       # move the ball
-      self.ball.move()
+      left_score, right_score = self.ball.move()
+      self.left_score = self.left_score + left_score
+      self.right_score = self.right_score + right_score
+
+      if self.left_score == 11 or self.right_score == 11:
+          self.continue_game = False
       # update the paddle rectangles
       self.paddle1.update()
       self.paddle2.update()
@@ -158,7 +186,19 @@ class Ball:
          # left, right, bottom, top
          if self.center[i] < self.radius or self.center[i] + self.radius >= size[i]: # right edge of window
              self.velocity[i] = -self.velocity[i]
+    
+      left_score = 0
+      right_score = 0
+      # every movement the scores are reset to 0, only become 1 if they hit a wall
       
+      # if ball goes over right edge, score becomes one
+      if self.center[0] + self.radius > size[0]:
+          right_score = 1       
+      # if ball goes over left edge, score becomes one
+      if self.center[0] < self.radius:
+          left_score = 1
+
+      return left_score, right_score
          
          
    def draw(self):
@@ -168,6 +208,15 @@ class Ball:
 
 class Paddle:
     def __init__(self, paddle_color, paddle_width, paddle_height, paddle_center, paddle_velocity, surface):
+      # Initialize a Paddle
+      # - self is the Paddle to initialize
+      # - paddle_color is the pygame.Color of the Paddle
+      # - paddle_center is a list containing the x and y int
+      #   coords of the center of the Paddle
+      # - paddle_width is the int pixel width of the Paddle
+      # - paddle_height is the int pixel height of the Paddle
+      # - paddle_velocity is a list containing the x and y components
+      # - surface is the window's pygame.Surface object
         self.paddle_color = pygame.Color(paddle_color)
         self.paddle_height = paddle_height
         self.paddle_width = paddle_width
@@ -179,6 +228,7 @@ class Paddle:
     
     def update(self):
         # update the rect of the paddle as the paddles move
+        # self is the Paddle
         self.rect = pygame.Rect(self.paddle_center, self.paddle_dimensions)
     
     def move(self, direction):
