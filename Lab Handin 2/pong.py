@@ -48,8 +48,8 @@ class Game:
 
       # === game specific objects
       self.ball = Ball('white', 5, [250, 200], [4,4], self.surface)
-      self.paddle1 = Paddle('white', 11, 42, [90 ,200], [0, 5], self.surface)
-      self.paddle2 = Paddle('white', 11, 42, [410 ,200], [0, 5], self.surface)
+      self.paddle1 = Paddle('white', 11, 42, [90 ,180], [0, 5], self.surface)
+      self.paddle2 = Paddle('white', 11, 42, [410 ,180], [0, 5], self.surface)
 
       self.left_score = 0
       self.right_score = 0
@@ -118,7 +118,10 @@ class Game:
       string = str(self.right_score)
       font = pygame.font.SysFont("Arial", font_size)
       text_box = font.render(string, True, fg_color)
-      location = (450, 0)
+      if self.right_score >=10:
+         location = (450, 0)
+      else: 
+         location = (475, 0) # accomodate double digit scores from right side.
       self.surface.blit(text_box, location)
 
    def update(self):
