@@ -18,7 +18,7 @@ def main():
    pygame.display.set_caption('A template for graphical games with two moving dots')   
    # get the display surface
    w_surface = pygame.display.get_surface() 
-   # create a game object 
+   # create a game object
    game = Game(w_surface)
    # start the main game loop by calling the play method on the game object
    game.play() 
@@ -96,8 +96,6 @@ class Game:
       
       if self.frame_counter > self.max_frames:
          self.continue_game = False
-
-      
 
 
 class Dot:

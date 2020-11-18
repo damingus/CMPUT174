@@ -15,10 +15,10 @@ def main():
    # create a pygame display window
    pygame.display.set_mode((500, 400))
    # set the title of the display window
-   pygame.display.set_caption('A template for graphical games with two moving dots')   
+   pygame.display.set_caption('Tic Tac Toe')   
    # get the display surface
    w_surface = pygame.display.get_surface() 
-   # create a game object 
+   # create a game object
    game = Game(w_surface)
    # start the main game loop by calling the play method on the game object
    game.play() 
@@ -46,11 +46,29 @@ class Game:
       self.continue_game = True
       
       # === game specific objects
-      self.small_dot = Dot('red', 30, [50, 50], [1, 2], self.surface)
-      self.big_dot = Dot('blue', 40, [200, 100], [2, 1], self.surface)
-      self.max_frames = 150
-      self.frame_counter = 0
-
+      # create board as an empty list
+      self.board_size = 3
+      self.board = []
+      self.create_board()
+      
+   def create_board(self):
+      width = self.surface.get_width()//3
+      height = self.surface.get_height()//3
+      # for each row index
+      for row_index in range(0,self.board_size):
+         # create row as an empty list
+         row = []
+         # for each column index
+         for col_index in range(0,self.board_size):
+            # create tile using row index and column index
+            x = col_index * width 
+            y = row_index * height
+            tile = Tile(x,y,width,height,self.surface)
+            # append tile to row
+            row.append(tile)
+         # append row to board
+         self.board.append(row)      
+      
    def play(self):
       # Play the game until the player presses the close box.
       # - self is the Game that should be continued or not.
@@ -58,7 +76,7 @@ class Game:
       while not self.close_clicked:  # until player clicks close box
          # play frame
          self.handle_events()
-         self.draw()            
+         self.draw()         
          if self.continue_game:
             self.update()
             self.decide_continue()
@@ -72,33 +90,36 @@ class Game:
       for event in events:
          if event.type == pygame.QUIT:
             self.close_clicked = True
+         if event.type == pygame.MOUSEBUTTONUP:
+             self.handle_mouse_up(event.pos)
+
+   def handle_mouse_up(self, position):
+       for row in self.board:
+           for tile in row:
+               tile.select(position) 
 
    def draw(self):
       # Draw all game objects.
       # - self is the Game to draw
       
       self.surface.fill(self.bg_color) # clear the display surface first
-      self.small_dot.draw()
-      self.big_dot.draw()
+      # draw the board
+      for row in self.board:
+         for tile in row:
+            tile.draw()
       pygame.display.update() # make the updated surface appear on the display
 
    def update(self):
       # Update the game objects for the next frame.
       # - self is the Game to update
+      pass
       
-      self.small_dot.move()
-      self.big_dot.move()
-      self.frame_counter = self.frame_counter + 1
 
    def decide_continue(self):
       # Check and remember if the game should continue
       # - self is the Game to check
-      
-      if self.frame_counter > self.max_frames:
-         self.continue_game = False
-
-      
-
+      pass
+       
 
 class Dot:
    # An object in this class represents a Dot that moves 
@@ -133,5 +154,62 @@ class Dot:
       
       pygame.draw.circle(self.surface, self.color, self.center, self.radius)
 
+class Tile:
+   # an object of this class represents a Rectangular Tile
+   
+   def __init__(self, x, y, width, height,surface):
+      
+      # Initialize a tile to contain a ' '
+      # - x is the int x coord of the upper left corner
+      # - y is the int y coord of the upper left corner
+      # - width is the int width of the tile
+      # - height is the int height of the tile
+      # - surface is pygame.Surface object on which a Tile object is drawn on
+      
+      self.rect = pygame.Rect(x,y,width,height)
+      self.surface = surface
+
+      # new instance attributes
+      self.content = ''
+      self.flashing = False
+   
+   def draw(self):
+      # draws a Tile object
+      # -self is the Tile object to draw
+      color = pygame.Color('white')
+      border_width = 3
+      
+      if self.flashing == False:
+        # black rectangle with a white border
+        pygame.draw.rect(self.surface,color,self.rect,border_width)
+        self.draw_content()
+      else:
+          # draw a white rectangle
+          pygame.draw.rect(self.surface,color,self.rect)
+          self.flashing = False
+
+   def draw_content(self):
+        font_size = self.surface.get_height()//3
+        fg_color = pygame.Color('white')
+        # create a font object
+        font = pygame.font.SysFont('', font_size)
+        # create the text box
+        text_box = font.render(self.content, True, fg_color)
+        # compute location of text box
+        # - text_box is a pygame.Surface object
+        # - get the rectangular area of the text_box
+        text_box_rect = text_box.get_rect()
+        text_box_rect.center = self.rect.center
+        # blit the textbox to the surface
+        self.surface.blit(text_box, text_box_rect)
+
+   def select(self, position):
+       # position is the location of the mouseclick (x,y)
+       if self.rect.collidepoint(position):
+           if self.content == '':
+               self.content = 'X'
+           else:
+               self.flashing = True
+            
 
 main()
